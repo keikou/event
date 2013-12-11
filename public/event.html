@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Socket.IO Chat</title>
+<link rel="stylesheet" type="text/css" href="/stylesheets/style.css"> 
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script>
+(function($) {
+  $(function() {
+    var socket = new io.connect("/mobbing");
+    
+    socket.on("playerin", function(data) {
+      $("<div>").text(data.name).attr("id",data.id).attr("class","player").appendTo($("#jsPlayerBox > ul")).click(function(){
+         alert("clicked!");
+      });
+    });
+    socket.on("playerout", function(data) {
+      $("#jsPlayerBox > ul > div").remove(":contains('" + data.name + "')");
+    });
+    
+    socket.on("currentplayer", function(data) {
+      $("#"+data.id).attr("class","me");
+    });
+    
+    socket.on("playersupdate", function(data) {
+      $("#jsPlayerBox > ul > div").remove();
+      var i;
+      for (i = 0; i < data.length; i++) { 
+          $("<div>").text(data[i].name).attr("id",data[i].id).attr("class","player").appendTo($("#jsPlayerBox > ul")).click(function(){
+          alert("clicked!");
+          });
+      };
+    });
+
+    socket.on("push", function(data) {
+      $("<p>").text(data).appendTo($("#jsMessageBox"));
+    });
+
+    $("#jsMessageForm").on('submit', function() {
+      var str = $("#jsMessageInput").val();
+      if (str != "") {
+        socket.emit("send", { message: str });
+        $("#jsMessageInput").val("");
+      }
+      return false;
+    });
+  });
+})(window.jQuery);
+</script>
+</head>
+
+<body>
+<div id="wrap">  
+    <div id="header">  
+        イベントタイトル  
+    </div><!-- /header -->   
+    <div id="inner">
+        <div id ="largeWrap">
+           ゲーム画面
+        </div>
+        <div id="sideBetaWrap">
+           <div id="jsPlayerBox">
+           PLAYER LIST
+           <ul></ul>
+           </div>
+           <div class="clear"><hr /></div> 
+           
+           <div id="jsMessageBox">
+           チャット・ボクス
+           <ul></ul>  
+           </div>
+           
+           <form id="jsMessageForm">
+           <input type="text" id="jsMessageInput">
+           <input type="submit" value="Send">
+           </form>
+        </div><!-- /sideBetaWrap -->  
+         
+    </div><!-- /inner --> 
+    <div id="footer">
+     Footer
+
+
+         
+    </div><!-- /footer --> 
+</div><!-- /wrap -->  
+
+
+
+
+</body>
+
+</html>
